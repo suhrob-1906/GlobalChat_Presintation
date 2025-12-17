@@ -1,59 +1,40 @@
-import { useEffect, useState } from "react";
-import { fetchMessages } from "../api/messages";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { getMessages } from "../api/messages";
 
-export default function Chat({ channel, socket }) {
+export default function Chat({ channel }) {
+  const { token } = useAuth();
   const [messages, setMessages] = useState([]);
-  const token = localStorage.getItem("access");
+  const socket = useRef(null);
 
-  // 📥 загрузка истории
   useEffect(() => {
-    if (!channel) return;
+    getMessages(channel.id, token).then(setMessages);
 
-    fetchMessages(channel.id, token).then((data) => {
-      setMessages(data);
-    });
-  }, [channel]);
-
-  // 📡 WebSocket
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.onmessage = (e) => {
-      const msg = JSON.parse(e.data);
-      if (msg.channel === channel.id) {
-        setMessages((prev) => [...prev, msg]);
-      }
-    };
-  }, [socket, channel]);
-
-  const sendMessage = (text) => {
-    socket.send(
-      JSON.stringify({
-        channel_id: channel.id,
-        text,
-      })
+    socket.current = new WebSocket(
+      `ws://127.0.0.1:8002/ws/chat/?token=${token}`
     );
-  };
+
+    socket.current.onmessage = (e) => {
+      setMessages(prev => [...prev, JSON.parse(e.data)]);
+    };
+
+    return () => socket.current.close();
+  }, [channel.id]);
+
+  function send(text) {
+    socket.current.send(JSON.stringify({
+      channel_id: channel.id,
+      text
+    }));
+  }
 
   return (
     <div>
-      <div>
-        {messages.map((msg) => (
-          <div key={msg.id}>
-            <b>{msg.user}</b>: {msg.text}
-          </div>
-        ))}
-      </div>
-
-      <input
-        placeholder="message"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            sendMessage(e.target.value);
-            e.target.value = "";
-          }
-        }}
-      />
+      <h4>{channel.name}</h4>
+      {messages.map((m, i) => (
+        <div key={i}><b>{m.user}</b>: {m.text}</div>
+      ))}
+      <input onKeyDown={e => e.key === "Enter" && send(e.target.value)} />
     </div>
   );
 }

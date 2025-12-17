@@ -1,46 +1,39 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from .models import UserProfile, Server, Channel, Message
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
     class Meta:
         model = User
         fields = ("username", "password")
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data["username"],
-            password=validated_data["password"],
-        )
-        return user
-from .models import Message
+        return User.objects.create_user(**validated_data)
 
 
-class MessageSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source="user.username")
+class ProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
 
     class Meta:
-        model = Message
-        fields = ("id", "user", "channel", "text", "created_at")
-from .models import Server, Channel, Message
+        model = UserProfile
+        fields = ("user_id", "username", "nickname", "phone", "bio", "avatar")
 
 
 class ServerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Server
-        fields = ("id", "name")
+        fields = "__all__"
 
 
 class ChannelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Channel
-        fields = ("id", "name", "type", "server")
+        fields = "__all__"
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source="user.username")
+    user = serializers.CharField(source="user.profile.nickname")
 
     class Meta:
         model = Message

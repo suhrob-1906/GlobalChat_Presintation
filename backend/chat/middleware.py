@@ -1,31 +1,21 @@
 from urllib.parse import parse_qs
 from django.contrib.auth.models import AnonymousUser
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.tokens import AccessToken
+from django.contrib.auth import get_user_model
 from channels.middleware import BaseMiddleware
 from channels.db import database_sync_to_async
-from django.db import close_old_connections
 
+User = get_user_model()
 
 @database_sync_to_async
 def get_user(token):
     try:
-        validated = JWTAuthentication().get_validated_token(token)
-        return JWTAuthentication().get_user(validated)
-    except Exception:
+        return User.objects.get(id=AccessToken(token)["user_id"])
+    except:
         return AnonymousUser()
-
 
 class JWTAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
-        close_old_connections()
-
-        query_string = scope.get("query_string", b"").decode()
-        query_params = parse_qs(query_string)
-
-        token = query_params.get("token")
-        if token:
-            scope["user"] = await get_user(token[0])
-        else:
-            scope["user"] = AnonymousUser()
-
+        qs = parse_qs(scope["query_string"].decode())
+        scope["user"] = await get_user(qs.get("token", [None])[0])
         return await super().__call__(scope, receive, send)

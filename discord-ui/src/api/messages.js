@@ -1,14 +1,11 @@
-const API_URL = "http://127.0.0.1:8001";
+const API = "http://127.0.0.1:8002";
 
-export async function fetchMessages(channelId, token) {
+export async function getMessages(channelId, token) {
   const res = await fetch(
-    `${API_URL}/api/messages/?channel_id=${channelId}`,
+    `${API}/api/messages/?channel=${channelId}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     }
   );
-
   return res.json();
 }
