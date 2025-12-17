@@ -1,46 +1,78 @@
-import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import { getMessages } from "../api/messages";
+import { useEffect, useState, useRef } from "react";
+import {getMessages} from "../api/messages";
+import Header from "./Header";
+import Message from "./Message";
 
-export default function Chat({ channel }) {
-  const { token } = useAuth();
-  const [messages, setMessages] = useState([]);
-  const ws = useRef(null);
+export default function Chat({ channel, messages, sendMessage }) {
+  const [messageHistory, setMessageHistory] = useState([]);
+  const messagesEndRef = useRef(null);
+  const token = localStorage.getItem("access");
 
+  // 📥 Load message history
   useEffect(() => {
-    if (!channel) return;
+    if (!channel || !token) return;
 
-    getMessages(channel.id, token).then(setMessages);
+    getMessages(channel.id, token)
+      .then((data) => {
+        setMessageHistory(data || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch messages:", err);
+        setMessageHistory([]);
+      });
+  }, [channel, token]);
 
-    ws.current = new WebSocket(
-      `ws://127.0.0.1:8002/ws/chat/?token=${token}`
-    );
+  // Combine history + live messages
+  const allMessages = [...messageHistory, ...messages];
 
-    ws.current.onmessage = (e) => {
-      setMessages(m => [...m, JSON.parse(e.data)]);
-    };
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [allMessages]);
 
-    return () => ws.current.close();
-  }, [channel?.id]);
-
-  function send(e) {
-    if (e.key !== "Enter") return;
-
-    ws.current.send(JSON.stringify({
-      channel_id: channel.id,
-      text: e.target.value,
-    }));
-
-    e.target.value = "";
-  }
+  const handleSendMessage = (e) => {
+    if (e.key === "Enter" && e.target.value.trim()) {
+      sendMessage(e.target.value.trim());
+      e.target.value = "";
+    }
+  };
 
   return (
-    <div>
-      <h4>{channel.name}</h4>
-      {messages.map((m, i) => (
-        <div key={i}><b>{m.user}</b>: {m.text}</div>
-      ))}
-      <input onKeyDown={send} />
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        background: "var(--bg-chat)",
+      }}
+    >
+      <Header channel={channel} />
+
+      <div className="messages-container">
+        {allMessages.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">#</div>
+            <div className="empty-state-title">
+              Welcome to #{channel?.name || "channel"}
+            </div>
+            <div className="empty-state-text">
+              This is the beginning of your conversation. Start chatting!
+            </div>
+          </div>
+        ) : (
+          allMessages.map((msg, idx) => <Message key={idx} message={msg} />)
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="chat-input-container">
+        <input
+          type="text"
+          className="chat-input"
+          placeholder={`Message #${channel?.name || "channel"}`}
+          onKeyDown={handleSendMessage}
+        />
+      </div>
     </div>
   );
 }

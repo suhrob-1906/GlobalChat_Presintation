@@ -29,3 +29,12 @@ def my_friends(request):
         status="accepted"
     )
     return Response(FriendSerializer(friends, many=True).data)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def remove_friend(request, friend_id):
+    FriendRequest.objects.filter(
+        id=friend_id,
+        status="accepted"
+    ).delete()
+    return Response({"status": "deleted"})

@@ -1,6 +1,7 @@
 from django.urls import path
-from .views import get_or_create_dialog
+from .views import my_dialogs, dialog_detail
 
 urlpatterns = [
-    path("", get_or_create_dialog),
-]
+    path("", my_dialogs),
+    path("<int:dialog_id>/", dialog_detail),
+    ]

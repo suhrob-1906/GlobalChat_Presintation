@@ -1,14 +1,33 @@
-export default function Message({ msg }) {
+export default function Message({ message }) {
+  // Format timestamp
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "";
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Get initials for avatar
+  const getInitials = (username) => {
+    if (!username) return "?";
+    return username[0].toUpperCase();
+  };
+
   return (
     <div className="message">
-      <img
-        src={msg.avatar || "/default-avatar.png"}
-        className="message-avatar"
-      />
-
+      <div className="message-avatar" title={message.user || "User"}>
+        {getInitials(message.user)}
+      </div>
       <div className="message-content">
-        <span className="message-user">{msg.user}</span>
-        <div className="message-text">{msg.text}</div>
+        <div className="message-header">
+          <span className="message-user">{message.user || "Unknown User"}</span>
+          <span className="message-timestamp">
+            {formatTime(message.timestamp || new Date())}
+          </span>
+        </div>
+        <div className="message-text">{message.text}</div>
       </div>
     </div>
   );

@@ -24,3 +24,16 @@ def create_server(request):
 def server_channels(request, server_id):
     channels = Channel.objects.filter(server_id=server_id)
     return Response(ChannelSerializer(channels, many=True).data)
+
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_server(request, server_id):
+    server = Server.objects.get(id=server_id, owner=request.user)
+    serializer = ServerSerializer(
+        server,
+        data=request.data,
+        partial=True
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)

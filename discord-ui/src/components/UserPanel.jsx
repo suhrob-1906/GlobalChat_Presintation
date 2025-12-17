@@ -1,29 +1,38 @@
 import { useAuth } from "../context/AuthContext";
-import { uploadAvatar } from "../api/profile";
 
 export default function UserPanel() {
   const { user } = useAuth();
-  const token = localStorage.getItem("access");
 
-  const changeAvatar = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  if (!user) return null;
 
-    await uploadAvatar(file, token);
-    window.location.reload();
+  const getInitials = (username) => {
+    if (!username) return "?";
+    return username[0].toUpperCase();
   };
 
   return (
     <div className="user-panel">
-      <label>
-        <img
-          src={user.avatar || "/default-avatar.png"}
-          className="avatar"
-        />
-        <input type="file" hidden onChange={changeAvatar} />
-      </label>
+      <div className="user-info">
+        <div className="user-avatar" title={user.username}>
+          {getInitials(user.username)}
+        </div>
+        <div className="user-details">
+          <div className="user-name">{user.username}</div>
+          <div className="user-status">Online</div>
+        </div>
+      </div>
 
-      <span>{user.username}</span>
+      <div className="user-actions">
+        <button className="user-btn" title="Mute">
+          🎤
+        </button>
+        <button className="user-btn" title="Deafen">
+          🎧
+        </button>
+        <button className="user-btn" title="Settings">
+          ⚙️
+        </button>
+      </div>
     </div>
   );
 }

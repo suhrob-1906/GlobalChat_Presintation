@@ -8,32 +8,27 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "accounts.apps.AccountsConfig",
-    "chat.apps.ChatConfig",
+
+    # Third-party
     "corsheaders",
     "rest_framework",
     "channels",
     "drf_spectacular",
 
-
+    # Local apps
+    "accounts.apps.AccountsConfig",
+    "chat.apps.ChatConfig",
     "servers",
-    "chat",
     "friends",
+    "dialogs",
 ]
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
-
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -43,7 +38,12 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
@@ -61,15 +61,11 @@ TEMPLATES = [
     },
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-ROOT_URLCONF = "core.urls"
-
 ASGI_APPLICATION = "core.asgi.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
     }
 }
 
@@ -85,6 +81,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 STATIC_URL = "/static/"
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# DRF + JWT + Swagger
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -95,6 +94,3 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
 }
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
