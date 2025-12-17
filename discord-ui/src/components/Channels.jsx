@@ -28,9 +28,8 @@ export default function Channels({
         {channels.map((channel) => (
           <div
             key={channel.id}
-            className={`channel ${
-              activeChannel?.id === channel.id ? "active" : ""
-            }`}
+            className={`channel ${activeChannel?.id === channel.id ? "active" : ""
+              }`}
             onClick={() => setActiveChannel(channel)}
           >
             # {channel.name}
