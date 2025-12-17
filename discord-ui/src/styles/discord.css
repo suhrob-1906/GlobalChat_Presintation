@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --bg-main: #313338;
   --bg-secondary: #2b2d31;
@@ -25,6 +27,7 @@ body {
   height: 100vh;
   color: var(--text-normal);
 }
+
 /* ===== SERVERS ===== */
 .server {
   width: 48px;
@@ -95,12 +98,12 @@ body {
 }
 
 .message:hover {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 
 .message:hover {
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .avatar {
@@ -113,6 +116,7 @@ body {
   justify-content: center;
   font-weight: bold;
 }
+
 :root {
   --bg-main: #313338;
   --bg-secondary: #2b2d31;
@@ -186,6 +190,7 @@ body {
   background: #404249;
   color: #fff;
 }
+
 .auth-page {
   height: 100vh;
   background: #313338;
@@ -213,6 +218,7 @@ body {
   color: #fff;
   cursor: pointer;
 }
+
 .user-panel {
   padding: 10px;
   background: #232428;
@@ -228,6 +234,7 @@ body {
   border-radius: 50%;
   cursor: pointer;
 }
+
 .message {
   display: flex;
   gap: 12px;
