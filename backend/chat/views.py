@@ -1,89 +1,36 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Server, Channel, Message
-from .serializers import (
-    RegisterSerializer,
-    ProfileSerializer,
-    ServerSerializer,
-    ChannelSerializer,
-    MessageSerializer
-)
-
-@api_view(["POST"])
-def register(request):
-    serializer = RegisterSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.save()
-
-    refresh = RefreshToken.for_user(user)
-    return Response({
-        "access": str(refresh.access_token),
-        "refresh": str(refresh)
-    })
+from .models import Message
+from .serializers import MessageSerializer
+from dialogs.models import Dialog
 
 
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def my_profile(request):
-    return Response(ProfileSerializer(request.user.profile).data)
-
-
-@api_view(["PATCH"])
-@permission_classes([IsAuthenticated])
-def update_profile(request):
-    serializer = ProfileSerializer(
-        request.user.profile,
-        data=request.data,
-        partial=True
-    )
-    serializer.is_valid(raise_exception=True)
-    serializer.save()
-    return Response(serializer.data)
-
-
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def create_server(request):
-    server = Server.objects.create(
-        name=request.data["name"],
-        owner=request.user
-    )
-    return Response(ServerSerializer(server).data)
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def my_servers(request):
-    servers = Server.objects.filter(owner=request.user)
-    return Response(ServerSerializer(servers, many=True).data)
-
-
-@api_view(["GET"])
-@permission_classes([IsAuthenticated])
-def server_channels(request, server_id):
-    channels = Channel.objects.filter(server_id=server_id)
-    return Response(ChannelSerializer(channels, many=True).data)
-
-
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def messages(request):
-    channel_id = request.GET.get("channel")
-    qs = Message.objects.filter(channel_id=channel_id).order_by("created_at")
-    return Response(MessageSerializer(qs, many=True).data)
-@api_view(["POST"])
-def register(request):
-    print("REGISTER DATA:", request.data)
+    # GET messages by dialog
+    if request.method == "GET":
+        dialog_id = request.GET.get("dialog")
+        if not dialog_id:
+            return Response({"detail": "dialog is required"}, status=400)
 
-    serializer = RegisterSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    user = serializer.save()
+        qs = Message.objects.filter(
+            dialog_id=dialog_id
+        ).order_by("created_at")
 
-    refresh = RefreshToken.for_user(user)
-    return Response({
-        "access": str(refresh.access_token),
-        "refresh": str(refresh)
-    })
+        return Response(MessageSerializer(qs, many=True).data)
+
+    # POST new message
+    dialog = Dialog.objects.get(id=request.data["dialog"])
+
+    msg = Message.objects.create(
+        dialog=dialog,
+        user=request.user,
+        text=request.data.get("text", ""),
+        file=request.FILES.get("file"),
+        file_type=request.data.get("file_type", ""),
+    )
+
+    return Response(MessageSerializer(msg).data, status=201)
