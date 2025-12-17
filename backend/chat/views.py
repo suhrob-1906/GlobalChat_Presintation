@@ -74,3 +74,16 @@ def messages(request):
     channel_id = request.GET.get("channel")
     qs = Message.objects.filter(channel_id=channel_id).order_by("created_at")
     return Response(MessageSerializer(qs, many=True).data)
+@api_view(["POST"])
+def register(request):
+    print("REGISTER DATA:", request.data)
+
+    serializer = RegisterSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        "access": str(refresh.access_token),
+        "refresh": str(refresh)
+    })

@@ -5,27 +5,33 @@ import { getMessages } from "../api/messages";
 export default function Chat({ channel }) {
   const { token } = useAuth();
   const [messages, setMessages] = useState([]);
-  const socket = useRef(null);
+  const ws = useRef(null);
 
   useEffect(() => {
+    if (!channel) return;
+
     getMessages(channel.id, token).then(setMessages);
 
-    socket.current = new WebSocket(
+    ws.current = new WebSocket(
       `ws://127.0.0.1:8002/ws/chat/?token=${token}`
     );
 
-    socket.current.onmessage = (e) => {
-      setMessages(prev => [...prev, JSON.parse(e.data)]);
+    ws.current.onmessage = (e) => {
+      setMessages(m => [...m, JSON.parse(e.data)]);
     };
 
-    return () => socket.current.close();
-  }, [channel.id]);
+    return () => ws.current.close();
+  }, [channel?.id]);
 
-  function send(text) {
-    socket.current.send(JSON.stringify({
+  function send(e) {
+    if (e.key !== "Enter") return;
+
+    ws.current.send(JSON.stringify({
       channel_id: channel.id,
-      text
+      text: e.target.value,
     }));
+
+    e.target.value = "";
   }
 
   return (
@@ -34,7 +40,7 @@ export default function Chat({ channel }) {
       {messages.map((m, i) => (
         <div key={i}><b>{m.user}</b>: {m.text}</div>
       ))}
-      <input onKeyDown={e => e.key === "Enter" && send(e.target.value)} />
+      <input onKeyDown={send} />
     </div>
   );
 }

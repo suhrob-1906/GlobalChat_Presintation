@@ -7,14 +7,14 @@ export default function Register() {
 
   async function submit() {
     await register(username, password);
-    alert("Registered, now login");
+    alert("Registered. Now login.");
   }
 
   return (
     <div>
       <h3>Register</h3>
-      <input onChange={e => setUsername(e.target.value)} />
-      <input type="password" onChange={e => setPassword(e.target.value)} />
+      <input placeholder="username" onChange={e => setUsername(e.target.value)} />
+      <input type="password" placeholder="password" onChange={e => setPassword(e.target.value)} />
       <button onClick={submit}>Register</button>
     </div>
   );

@@ -9,7 +9,7 @@ export default function Login() {
 
   async function submit() {
     const data = await apiLogin(username, password);
-    login(data.access);
+    if (data.access) login(data.access);
   }
 
   return (

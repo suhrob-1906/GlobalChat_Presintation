@@ -1,27 +1,43 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { getProfile } from "../api/profile";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(
-    localStorage.getItem("access")
-  );
+  const [token, setToken] = useState(localStorage.getItem("access"));
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = (access) => {
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    getProfile(token)
+      .then(setUser)
+      .catch(() => logout())
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  function login(access) {
     localStorage.setItem("access", access);
     setToken(access);
-  };
+  }
 
-  const logout = () => {
+  function logout() {
     localStorage.clear();
     setToken(null);
-  };
+    setUser(null);
+  }
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

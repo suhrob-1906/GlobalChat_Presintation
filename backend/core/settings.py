@@ -16,12 +16,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # third-party
     "rest_framework",
     "channels",
+    "corsheaders",
+
+    # local
     "chat",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",  # 👈 ОБЯЗАТЕЛЬНО ПЕРВЫМ
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -63,7 +68,15 @@ USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# --------------------
+# CORS (ВАЖНО)
+# --------------------
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# --------------------
 # DRF + JWT
+# --------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -74,10 +87,12 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
 }
 
-# ASGI
+# --------------------
+# ASGI + CHANNELS
+# --------------------
 ASGI_APPLICATION = "core.asgi.application"
 
-# 🔥 InMemory (DEV). Для проды заменим на Redis
+# DEV: без Redis
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
