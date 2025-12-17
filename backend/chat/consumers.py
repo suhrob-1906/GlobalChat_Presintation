@@ -1,33 +1,20 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.contrib.auth.models import AnonymousUser
-from channels.db import database_sync_to_async
-from .models import Message
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        if isinstance(self.scope["user"], AnonymousUser):
-            await self.close()
-            return
+        self.room = "global"
+        await self.channel_layer.group_add(self.room, self.channel_name)
         await self.accept()
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        msg = await self.save(
-            self.scope["user"],
-            data["channel_id"],
-            data["text"]
+        await self.channel_layer.group_send(
+            self.room,
+            {
+                "type": "chat_message",
+                "message": text_data
+            }
         )
-        await self.send(json.dumps({
-            "user": msg.user.profile.nickname,
-            "text": msg.text,
-            "channel_id": msg.channel_id
-        }))
 
-    @database_sync_to_async
-    def save(self, user, channel_id, text):
-        return Message.objects.create(
-            user=user,
-            channel_id=channel_id,
-            text=text
-        )
+    async def chat_message(self, event):
+        await self.send(text_data=event["message"])

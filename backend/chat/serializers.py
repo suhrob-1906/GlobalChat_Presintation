@@ -1,6 +1,15 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import UserProfile, Server, Channel, Message
+from rest_framework import serializers
+from .models import Message
+
+class MessageSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source="user.username")
+
+    class Meta:
+        model = Message
+        fields = "__all__"
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -30,11 +39,3 @@ class ChannelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Channel
         fields = "__all__"
-
-
-class MessageSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(source="user.profile.nickname")
-
-    class Meta:
-        model = Message
-        fields = ("id", "user", "text", "created_at", "channel_id")

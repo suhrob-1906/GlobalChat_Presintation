@@ -3,10 +3,9 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "dev-secret-key"
+SECRET_KEY = "dev-secret"
 DEBUG = True
-
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -15,28 +14,36 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # third-party
+    "accounts.apps.AccountsConfig",
+    "chat.apps.ChatConfig",
+    "corsheaders",
     "rest_framework",
     "channels",
-    "corsheaders",
+    "drf_spectacular",
 
-    # local
+
+    "servers",
     "chat",
+    "friends",
 ]
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # 👈 ОБЯЗАТЕЛЬНО ПЕРВЫМ
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
@@ -54,6 +61,18 @@ TEMPLATES = [
     },
 ]
 
+CORS_ALLOW_ALL_ORIGINS = True
+
+ROOT_URLCONF = "core.urls"
+
+ASGI_APPLICATION = "core.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -61,40 +80,21 @@ DATABASES = {
     }
 }
 
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_TZ = True
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-STATIC_URL = "static/"
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STATIC_URL = "/static/"
 
-# --------------------
-# CORS (ВАЖНО)
-# --------------------
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
-
-# --------------------
-# DRF + JWT
-# --------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
 }
 
-# --------------------
-# ASGI + CHANNELS
-# --------------------
-ASGI_APPLICATION = "core.asgi.application"
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# DEV: без Redis
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    }
-}
