@@ -4,8 +4,8 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "dev-secret"
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     # Django
@@ -24,10 +24,10 @@ INSTALLED_APPS = [
 
     # Local apps
     "accounts.apps.AccountsConfig",
+    'dialogs.apps.DialogsConfig',
     "chat.apps.ChatConfig",
+    "friends.apps.FriendsConfig",
     "servers",
-    "friends",
-    "dialogs",
 ]
 
 MIDDLEWARE = [
@@ -80,6 +80,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

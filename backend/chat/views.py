@@ -2,35 +2,41 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from dialogs.models import Dialog
 from .models import Message
 from .serializers import MessageSerializer
-from dialogs.models import Dialog
 
 
-@api_view(["GET", "POST"])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def messages(request):
-    # GET messages by dialog
-    if request.method == "GET":
-        dialog_id = request.GET.get("dialog")
-        if not dialog_id:
-            return Response({"detail": "dialog is required"}, status=400)
+def messages_list(request):
+    dialog_id = request.GET.get("dialog_id")
 
-        qs = Message.objects.filter(
-            dialog_id=dialog_id
-        ).order_by("created_at")
+    if not dialog_id:
+        return Response({"error": "dialog_id required"}, status=400)
 
-        return Response(MessageSerializer(qs, many=True).data)
+    dialog = Dialog.objects.get(id=dialog_id, members=request.user)
+    messages = Message.objects.filter(dialog=dialog).order_by("created_at")
 
-    # POST new message
-    dialog = Dialog.objects.get(id=request.data["dialog"])
+    return Response(MessageSerializer(messages, many=True).data)
 
-    msg = Message.objects.create(
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def send_message(request):
+    dialog_id = request.data.get("dialog")
+    text = request.data.get("text", "")
+    file = request.FILES.get("file")
+    file_type = request.data.get("file_type", "")
+
+    dialog = Dialog.objects.get(id=dialog_id, members=request.user)
+
+    message = Message.objects.create(
         dialog=dialog,
-        user=request.user,
-        text=request.data.get("text", ""),
-        file=request.FILES.get("file"),
-        file_type=request.data.get("file_type", ""),
+        sender=request.user,
+        text=text,
+        file=file,
+        file_type=file_type
     )
 
-    return Response(MessageSerializer(msg).data, status=201)
+    return Response(MessageSerializer(message).data)

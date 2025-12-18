@@ -1,26 +1,23 @@
 from rest_framework import serializers
 from .models import Message
+from accounts.serializers import ProfileSerializer
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
+    sender = ProfileSerializer(
+        source="sender.profile",
+        read_only=True
+    )
 
     class Meta:
         model = Message
-        fields = [
+        fields = (
             "id",
             "dialog",
-            "user",
+            "sender",
             "text",
             "file",
             "file_type",
             "created_at",
-        ]
-
-    def get_user(self, obj):
-        p = obj.user.userprofile
-        return {
-            "id": obj.user.id,
-            "nickname": p.nickname,
-            "avatar": p.avatar.url if p.avatar else None,
-        }
+        )
+        read_only_fields = ("id", "sender", "created_at")

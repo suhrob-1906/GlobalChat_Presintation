@@ -1,18 +1,15 @@
 from django.urls import path
-
-from .views import register, login, me
-from .profile_views import my_profile
-from .user_views import search_users
+from rest_framework_simplejwt.views import TokenObtainPairView
+from . import views
 
 urlpatterns = [
-    # AUTH
-    path("register/", register),
-    path("login/", login),
-    path("me/", me),
+    path("register/", views.register),
+    path("login/", TokenObtainPairView.as_view()),
+    path("me/", views.me),
 
-    # PROFILE
-    path("profile/me/", my_profile),
+    path("profile/me/", views.me),
+    path("profile/me/update/", views.update_profile),
 
-    # USERS
-    path("users/search/", search_users),
+    path("users/search/", views.search_users),
+    path("ping/", views.ping),
 ]
