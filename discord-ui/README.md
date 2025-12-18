@@ -1,3 +1,21 @@
+# discord-ui (design-only)
+
+This folder contains a static, design-focused Discord-like UI built with React + Vite + Tailwind.
+
+Quick start:
+
+```bash
+cd discord-ui
+npm install
+npm run dev
+```
+
+Notes:
+- The UI uses mock data in `src/data/mockData.js`.
+- Tailwind is configured via `tailwind.config.cjs` and the Vite plugin `@tailwindcss/vite`.
+- No backend or authentication is included — the project is visual only.
+
+If `npm run dev` fails, check Node version (recommended >=16) and that `npm install` completed successfully.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

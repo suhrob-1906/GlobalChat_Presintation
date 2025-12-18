@@ -1,19 +1,47 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Servers from '../Components/Servers'
 import Sidebar from '../Components/Sidebar'
 import ChatPanel from '../Components/ChatPanel'
 import ChannelHeader from '../Components/ChannelHeader'
 import Composer from '../Components/Composer'
+import MembersList from '../Components/MembersList'
+import { useChat } from '../hooks/useChat'
 
 export default function Home() {
+  const defaultServer = 'server-1'
+  const defaultChannel = 'ch-4'
+  const [showMembers, setShowMembers] = useState(true)
+
+  const {
+    server,
+    channel,
+    categories,
+    members,
+    messages,
+    currentUser,
+    sendMessage,
+    addReaction,
+    loadMessages,
+  } = useChat(defaultServer, defaultChannel)
+
+  useEffect(() => {
+    loadMessages()
+  }, [loadMessages])
+
   return (
     <div className="app-container">
       <Servers />
-      <Sidebar />
-      <div className="flex flex-col flex-1">
-        <ChannelHeader title="welcome" />
-        <ChatPanel />
-        <Composer />
+      <Sidebar server={server} categories={categories} currentUser={currentUser} />
+
+      <div className="flex flex-col flex-1 min-w-0 bg-[#313338]">
+        <ChannelHeader channel={channel} showMembers={showMembers} onToggleMembers={() => setShowMembers(!showMembers)} />
+        <div className="flex flex-1 min-h-0">
+          <div className="flex flex-col flex-1 min-w-0">
+            <ChatPanel messages={messages} channel={channel} onReact={addReaction} />
+            <Composer channelName={channel?.name || 'general'} onSend={sendMessage} />
+          </div>
+          {showMembers && <MembersList members={members} />}
+        </div>
       </div>
     </div>
   )
