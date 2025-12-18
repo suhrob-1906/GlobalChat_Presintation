@@ -1,23 +1,40 @@
 from pathlib import Path
 from datetime import timedelta
+import os
+
+# ===============================
+# BASE
+# ===============================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import os
+# ===============================
+# SECURITY
+# ===============================
 
-
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-secret")
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "unsafe-dev-secret-change-me"
+)
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = [
+    "globalchat-presintation.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
-SPECTACULAR_SETTINGS = {
-    "TITLE": "GlobalChat API",
-    "DESCRIPTION": "Backend API for chat application",
-    "VERSION": "1.0.0",
-    "SERVE_INCLUDE_SCHEMA": True,
-}
+CSRF_TRUSTED_ORIGINS = [
+    "https://globalchat-presintation.onrender.com",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+# ===============================
+# APPLICATIONS
+# ===============================
 
 INSTALLED_APPS = [
     # Django
@@ -36,11 +53,15 @@ INSTALLED_APPS = [
 
     # Local apps
     "accounts.apps.AccountsConfig",
-    'dialogs.apps.DialogsConfig',
+    "dialogs.apps.DialogsConfig",
     "chat.apps.ChatConfig",
     "friends.apps.FriendsConfig",
     "servers",
 ]
+
+# ===============================
+# MIDDLEWARE
+# ===============================
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -54,6 +75,10 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# ===============================
+# URLS / TEMPLATES
+# ===============================
 
 ROOT_URLCONF = "core.urls"
 
@@ -73,6 +98,10 @@ TEMPLATES = [
     },
 ]
 
+# ===============================
+# ASGI / CHANNELS
+# ===============================
+
 ASGI_APPLICATION = "core.asgi.application"
 
 CHANNEL_LAYERS = {
@@ -81,6 +110,10 @@ CHANNEL_LAYERS = {
     }
 }
 
+# ===============================
+# DATABASE
+# ===============================
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -88,15 +121,26 @@ DATABASES = {
     }
 }
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# ===============================
+# STATIC / MEDIA
+# ===============================
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# ===============================
+# DJANGO DEFAULTS
+# ===============================
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# DRF + JWT + Swagger
+# ===============================
+# DRF / JWT
+# ===============================
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -106,4 +150,15 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+}
+
+# ===============================
+# SWAGGER / OPENAPI
+# ===============================
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "GlobalChat API",
+    "DESCRIPTION": "Backend API for chat application",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
 }
