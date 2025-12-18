@@ -5,11 +5,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 import os
 
+DEBUG = True
+
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-secret")
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "GlobalChat API",
+    "DESCRIPTION": "Backend API for chat application",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+}
 
 INSTALLED_APPS = [
     # Django
