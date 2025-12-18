@@ -1,0 +1,8 @@
+Django>=5.2
+djangorestframework
+djangorestframework-simplejwt
+drf-spectacular
+django-cors-headers
+channels
+daphne
+gunicorn
