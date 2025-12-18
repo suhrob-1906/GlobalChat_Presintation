@@ -2,15 +2,15 @@ from pathlib import Path
 from datetime import timedelta
 import os
 
-# ===============================
+# ==================================================
 # BASE
-# ===============================
+# ==================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ===============================
-# SECURITY
-# ===============================
+# ==================================================
+# SECURITY / ENV
+# ==================================================
 
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
@@ -19,22 +19,21 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = [
-    "globalchat-presintation.onrender.com",
-    "localhost",
-    "127.0.0.1",
-]
+ALLOWED_HOSTS = os.environ.get(
+    "ALLOWED_HOSTS",
+    "localhost,127.0.0.1"
+).split(",")
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://globalchat-presintation.onrender.com",
+    f"https://{host}" for host in ALLOWED_HOSTS if host
 ]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-# ===============================
+# ==================================================
 # APPLICATIONS
-# ===============================
+# ==================================================
 
 INSTALLED_APPS = [
     # Django
@@ -59,9 +58,9 @@ INSTALLED_APPS = [
     "servers",
 ]
 
-# ===============================
+# ==================================================
 # MIDDLEWARE
-# ===============================
+# ==================================================
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -76,9 +75,9 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# ===============================
+# ==================================================
 # URLS / TEMPLATES
-# ===============================
+# ==================================================
 
 ROOT_URLCONF = "core.urls"
 
@@ -98,9 +97,9 @@ TEMPLATES = [
     },
 ]
 
-# ===============================
+# ==================================================
 # ASGI / CHANNELS
-# ===============================
+# ==================================================
 
 ASGI_APPLICATION = "core.asgi.application"
 
@@ -110,9 +109,9 @@ CHANNEL_LAYERS = {
     }
 }
 
-# ===============================
-# DATABASE
-# ===============================
+# ==================================================
+# DATABASE (SQLite — OK for Render)
+# ==================================================
 
 DATABASES = {
     "default": {
@@ -121,9 +120,9 @@ DATABASES = {
     }
 }
 
-# ===============================
+# ==================================================
 # STATIC / MEDIA
-# ===============================
+# ==================================================
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -131,15 +130,15 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ===============================
+# ==================================================
 # DJANGO DEFAULTS
-# ===============================
+# ==================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ===============================
+# ==================================================
 # DRF / JWT
-# ===============================
+# ==================================================
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -152,9 +151,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
 }
 
-# ===============================
+# ==================================================
 # SWAGGER / OPENAPI
-# ===============================
+# ==================================================
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "GlobalChat API",
