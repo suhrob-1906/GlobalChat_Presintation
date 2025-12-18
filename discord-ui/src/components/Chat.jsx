@@ -1,34 +1,14 @@
-import { useEffect, useState, useRef } from "react";
-import {getMessages} from "../api/messages";
+import { useEffect, useRef } from "react";
 import Header from "./Header";
 import Message from "./Message";
 
 export default function Chat({ channel, messages, sendMessage }) {
-  const [messageHistory, setMessageHistory] = useState([]);
   const messagesEndRef = useRef(null);
-  const token = localStorage.getItem("access");
-
-  // 📥 Load message history
-  useEffect(() => {
-    if (!channel || !token) return;
-
-    getMessages(channel.id, token)
-      .then((data) => {
-        setMessageHistory(data || []);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch messages:", err);
-        setMessageHistory([]);
-      });
-  }, [channel, token]);
-
-  // Combine history + live messages
-  const allMessages = [...messageHistory, ...messages];
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [allMessages]);
+  }, [messages]);
 
   const handleSendMessage = (e) => {
     if (e.key === "Enter" && e.target.value.trim()) {
@@ -49,7 +29,7 @@ export default function Chat({ channel, messages, sendMessage }) {
       <Header channel={channel} />
 
       <div className="messages-container">
-        {allMessages.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">#</div>
             <div className="empty-state-title">
@@ -60,7 +40,7 @@ export default function Chat({ channel, messages, sendMessage }) {
             </div>
           </div>
         ) : (
-          allMessages.map((msg, idx) => <Message key={idx} message={msg} />)
+          messages.map((msg, idx) => <Message key={idx} message={msg} />)
         )}
         <div ref={messagesEndRef} />
       </div>

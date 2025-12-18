@@ -1,3 +1,5 @@
+import UserPanel from "./UserPanel";
+
 export default function Channels({ channels, setActive }) {
   return (
     <div
@@ -14,6 +16,10 @@ export default function Channels({ channels, setActive }) {
             color: "var(--text-muted)",
             marginBottom: 6,
             paddingLeft: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
           }}
         >
           TEXT CHANNELS
@@ -22,9 +28,8 @@ export default function Channels({ channels, setActive }) {
         {channels.map((channel) => (
           <div
             key={channel.id}
-            className={`channel ${activeChannel?.id === channel.id ? "active" : ""
-              }`}
-            onClick={() => setActiveChannel(channel)}
+            className="channel"
+            onClick={() => setActive(channel)}
           >
             # {channel.name}
           </div>

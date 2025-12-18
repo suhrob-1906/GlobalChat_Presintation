@@ -1,35 +1,17 @@
 import { useState } from "react";
-import { login } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login({ onSwitch }) {
-  const { loginUser } = useAuth();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const submit = async () => {
+  const submit = () => {
     if (!username || !password) {
-      setError("Please fill in all fields");
+      alert("Please fill in all fields");
       return;
     }
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await login(username, password);
-      if (data.access) {
-        loginUser(data.access, data.refresh);
-      } else {
-        setError("Invalid credentials");
-      }
-    } catch (err) {
-      setError("Login failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    login();
   };
 
   const handleKeyPress = (e) => {
@@ -43,22 +25,6 @@ export default function Login({ onSwitch }) {
       <div className="auth-container">
         <h2>Welcome back!</h2>
         <p>We're so excited to see you again!</p>
-
-        {error && (
-          <div
-            style={{
-              background: "rgba(237, 66, 69, 0.1)",
-              color: "var(--danger)",
-              padding: "10px",
-              borderRadius: "8px",
-              marginBottom: "16px",
-              fontSize: "14px",
-              textAlign: "center",
-            }}
-          >
-            {error}
-          </div>
-        )}
 
         <input
           placeholder="Username"
@@ -76,9 +42,7 @@ export default function Login({ onSwitch }) {
           onKeyPress={handleKeyPress}
         />
 
-        <button onClick={submit} disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
+        <button onClick={submit}>Login</button>
 
         <button className="auth-link" onClick={onSwitch}>
           Need an account? Register

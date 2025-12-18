@@ -1,10 +1,24 @@
 export default function Servers({ servers, setActive }) {
   return (
-    <div>
-      <h4>Servers</h4>
-      {servers.map(s => (
-        <div key={s.id} onClick={() => setActive(s)}>
-          {s.name}
+    <div
+      style={{
+        width: 72,
+        background: "var(--bg-tertiary)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        paddingTop: 10,
+        gap: 8,
+      }}
+    >
+      {servers.map((server) => (
+        <div
+          key={server.id}
+          className="server"
+          onClick={() => setActive(server)}
+          title={server.name}
+        >
+          {server.name[0].toUpperCase()}
         </div>
       ))}
     </div>
