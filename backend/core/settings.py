@@ -3,9 +3,13 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "dev-secret"
-DEBUG = False
-ALLOWED_HOSTS = ["*"]
+import os
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-secret")
+
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
 INSTALLED_APPS = [
     # Django
