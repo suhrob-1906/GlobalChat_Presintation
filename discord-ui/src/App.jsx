@@ -1,12 +1,18 @@
-import { useAuth } from "./context/AuthContext";
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Panel from "./components/Panel";
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import Home from './Pages/Home'
+import Channel from './Pages/Channel'
+import Settings from './Pages/Settings'
 
 export default function App() {
-  const { user, loading } = useAuth();
-
-  if (loading) return <div>Loading...</div>;
-  if (!user) return (<><Register /><Login /></>);
-  return <Panel />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/server/1/channel/1" replace />} />
+        <Route path="/server/:serverId/channel/:channelId" element={<Channel />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
