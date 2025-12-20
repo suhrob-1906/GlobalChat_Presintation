@@ -18,7 +18,8 @@ def env(key, default=None):
 # SECURITY / ENV
 # ==================================================
 
-DEBUG = env("DEBUG", "False") == "True"
+# Default to DEBUG=True for local development unless explicitly disabled
+DEBUG = env("DEBUG", "True") == "True"
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 if not SECRET_KEY and not DEBUG:
@@ -28,7 +29,7 @@ if not SECRET_KEY and DEBUG:
 
 ALLOWED_HOSTS = env(
     "ALLOWED_HOSTS",
-    "globalchat-presintation.render.com"
+    "localhost,127.0.0.1,globalchat-presintation.render.com"
 ).split(",")
 ALLOWED_HOSTS = [h for h in [h.strip() for h in ALLOWED_HOSTS] if h]
 
