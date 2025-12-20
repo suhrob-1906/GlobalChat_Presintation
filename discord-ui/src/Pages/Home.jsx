@@ -1,48 +1,71 @@
-import React, { useState, useEffect } from 'react'
-import Servers from '../Components/Servers'
-import Sidebar from '../Components/Sidebar'
-import ChatPanel from '../Components/ChatPanel'
-import ChannelHeader from '../Components/ChannelHeader'
-import Composer from '../Components/Composer'
-import MembersList from '../Components/MembersList'
-import { useChat } from '../hooks/useChat'
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { getDialogs } from "../api/dialogs";
+import Sidebar from "../components/Sidebar";
+import DialogList from "../components/DialogList";
+import MessageList from "../components/MessageList";
+import MessageInput from "../components/MessageInput";
+import "../styles/home.css";
 
 export default function Home() {
-  const defaultServer = 'server-1'
-  const defaultChannel = 'ch-4'
-  const [showMembers, setShowMembers] = useState(true)
-
-  const {
-    server,
-    channel,
-    categories,
-    members,
-    messages,
-    currentUser,
-    sendMessage,
-    addReaction,
-    loadMessages,
-  } = useChat(defaultServer, defaultChannel)
+  const { user } = useAuth();
+  const [selectedDialog, setSelectedDialog] = useState(null);
+  const [dialogs, setDialogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadMessages()
-  }, [loadMessages])
+    loadDialogs();
+    const interval = setInterval(loadDialogs, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadDialogs = async () => {
+    try {
+      const data = await getDialogs();
+      setDialogs(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="app-container">
-      <Servers />
-      <Sidebar server={server} categories={categories} currentUser={currentUser} />
+    <div className="home-container">
+      <Sidebar />
+      
+      <div className="main-content">
+        <div className="dialogs-panel">
+          <DialogList 
+            dialogs={dialogs} 
+            selectedDialog={selectedDialog}
+            onSelectDialog={setSelectedDialog}
+          />
+        </div>
 
-      <div className="flex flex-col flex-1 min-w-0 bg-[#313338]">
-        <ChannelHeader channel={channel} showMembers={showMembers} onToggleMembers={() => setShowMembers(!showMembers)} />
-        <div className="flex flex-1 min-h-0">
-          <div className="flex flex-col flex-1 min-w-0">
-            <ChatPanel messages={messages} channel={channel} onReact={addReaction} />
-            <Composer channelName={channel?.name || 'general'} onSend={sendMessage} />
+        <div className="messages-panel">
+          {selectedDialog ? (
+            <>
+              <div className="message-header">
+                <h2>{selectedDialog.title || selectedDialog.name}</h2>
+              </div>
+              <MessageList dialogId={selectedDialog.id} />
+              <MessageInput dialogId={selectedDialog.id} onMessageSent={loadDialogs} />
+            </>
+          ) : (
+            <div className="no-dialog-selected">
+              <p>Выберите диалог для начала переписки</p>
+            </div>
+          )}
+        </div>
+
+        <div className="users-online-panel">
+          <h3>Онлайн</h3>
+          <div className="online-users">
+            {/* Список пользователей онлайн будет здесь */}
           </div>
-          {showMembers && <MembersList members={members} />}
         </div>
       </div>
     </div>
-  )
+  );
 }

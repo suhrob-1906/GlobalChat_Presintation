@@ -1,0 +1,96 @@
+.dialog-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.search-box {
+  padding: 16px;
+  background: #2f3136;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #202225;
+  border: 1px solid #202225;
+  border-radius: 4px;
+  color: #dcddde;
+  font-size: 14px;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #7289da;
+  background: #36393f;
+}
+
+.search-results,
+.dialogs {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.search-result-item,
+.dialog-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-left: 3px solid transparent;
+}
+
+.dialog-item:hover,
+.search-result-item:hover {
+  background: #2f3136;
+}
+
+.dialog-item.active {
+  background: #2f3136;
+  border-left-color: #7289da;
+}
+
+.dialog-item img,
+.search-result-item img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dialog-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog-info h4,
+.user-info .username {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dialog-info p,
+.user-info .nickname {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: #72767d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread-badge {
+  background: #7289da;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}

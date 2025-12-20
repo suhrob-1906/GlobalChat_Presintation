@@ -1,0 +1,75 @@
+.home-container {
+  display: flex;
+  height: 100vh;
+  background: #36393f;
+  color: #dcddde;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.dialogs-panel {
+  width: 360px;
+  background: #2f3136;
+  border-right: 1px solid #202225;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.messages-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #36393f;
+}
+
+.message-header {
+  padding: 16px 20px;
+  background: #2f3136;
+  border-bottom: 1px solid #202225;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.message-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.no-dialog-selected {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #72767d;
+  font-size: 16px;
+}
+
+.users-online-panel {
+  width: 240px;
+  background: #2f3136;
+  border-left: 1px solid #202225;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.users-online-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #72767d;
+  text-transform: uppercase;
+}
+
+.online-users {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

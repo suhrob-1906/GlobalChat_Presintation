@@ -1,20 +1,77 @@
-import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Home from './Pages/Home'
-import Channel from './Pages/Channel'
-import Settings from './Pages/Settings'
-import AccountSettings from './Pages/AccountSettings'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import Search from "./pages/Search";
+import RequireAuth from "./components/RequireAuth";
+import "./App.css";
+
+function AppRoutes() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <div className="spinner"></div>
+        <p>Загрузка...</p>
+      </div>
+    );
+  }
+
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      <Route
+        path="/"
+        element={
+          <RequireAuth>
+            <Home />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <RequireAuth>
+            <Profile />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/profile/:userId"
+        element={
+          <RequireAuth>
+            <Profile />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/search"
+        element={
+          <RequireAuth>
+            <Search />
+          </RequireAuth>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/server/server-1/channel/ch-4" replace />} />
-        <Route path="/server/:serverId/channel/:channelId" element={<Channel />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/account" element={<AccountSettings />} />
-        <Route path="*" element={<Home />} />
-      </Routes>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
-  )
+  );
 }
