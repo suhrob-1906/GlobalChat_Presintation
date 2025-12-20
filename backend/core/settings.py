@@ -1,6 +1,7 @@
 from pathlib import Path
-from datetime import timedelta
 import os
+from datetime import timedelta
+from django.core.exceptions import ImproperlyConfigured
 
 # ==================================================
 # BASE
@@ -8,28 +9,35 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def env(key, default=None):
+    return os.environ.get(key, default)
+
+
 # ==================================================
 # SECURITY / ENV
 # ==================================================
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "unsafe-dev-secret-change-me"
-)
+DEBUG = env("DEBUG", "False") == "True"
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+SECRET_KEY = env("DJANGO_SECRET_KEY")
+if not SECRET_KEY and not DEBUG:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is required in production")
+if not SECRET_KEY and DEBUG:
+    SECRET_KEY = "Suhrob"
 
-ALLOWED_HOSTS = os.environ.get(
+ALLOWED_HOSTS = env(
     "ALLOWED_HOSTS",
-    "localhost,127.0.0.1"
+    "globalchat-presintation.render.com"
 ).split(",")
+ALLOWED_HOSTS = [h for h in [h.strip() for h in ALLOWED_HOSTS] if h]
 
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{host}" for host in ALLOWED_HOSTS if host
-]
+# Trusted origins for CSRF (helpful when using https)
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h and h != "localhost"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
+
 
 # ==================================================
 # APPLICATIONS
@@ -47,6 +55,7 @@ INSTALLED_APPS = [
     # Third-party
     "corsheaders",
     "rest_framework",
+    "rest_framework_simplejwt",
     "channels",
     "drf_spectacular",
 
@@ -57,6 +66,7 @@ INSTALLED_APPS = [
     "friends.apps.FriendsConfig",
     "servers",
 ]
+
 
 # ==================================================
 # MIDDLEWARE
@@ -73,7 +83,21 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS
+# In development it's often convenient to allow all origins. In production
+# provide FRONTEND_URLS env var (comma-separated) or set CORS_ALLOWED_ORIGINS.
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    cors_env = env("CORS_ALLOWED_ORIGINS", "https://globalchat-presintation.render.com")
+    cors_origins = cors_env.split(",")
+    CORS_ALLOWED_ORIGINS = [u.strip() for u in cors_origins if u.strip()]
+
 
 # ==================================================
 # URLS / TEMPLATES
@@ -97,28 +121,53 @@ TEMPLATES = [
     },
 ]
 
+
 # ==================================================
 # ASGI / CHANNELS
 # ==================================================
 
 ASGI_APPLICATION = "core.asgi.application"
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+# Configure CHANNEL_LAYERS from REDIS_URL if provided (recommended for prod).
+REDIS_URL = env("REDIS_URL")
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [REDIS_URL]},
+        }
     }
-}
+else:
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
 
 # ==================================================
-# DATABASE (SQLite — OK for Render)
+# DATABASE
+# Use DATABASE_URL in production (Render provides it). Fallback to sqlite for dev.
 # ==================================================
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+DATABASE_URL = env("DATABASE_URL")
+if DATABASE_URL:
+    try:
+        import dj_database_url
+
+        DATABASES = {"default": dj_database_url.parse(DATABASE_URL, conn_max_age=600)}
+    except Exception:
+        # If dj_database_url is not installed, fallback to sqlite and warn in logs.
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+
 
 # ==================================================
 # STATIC / MEDIA
@@ -130,11 +179,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+
 # ==================================================
 # DJANGO DEFAULTS
 # ==================================================
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 
 # ==================================================
 # DRF / JWT
@@ -149,7 +200,9 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
 
 # ==================================================
 # SWAGGER / OPENAPI
@@ -161,3 +214,15 @@ SPECTACULAR_SETTINGS = {
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": True,
 }
+
+
+# ==================================================
+# PRODUCTION SECURITY TWEAKS
+# ==================================================
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(env("SECURE_HSTS_SECONDS", "3600"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

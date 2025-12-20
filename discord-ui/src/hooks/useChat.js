@@ -9,7 +9,7 @@ import {
   currentUser,
 } from '../data/mockData';
 
-const API_BASE = 'https://globalchat-presintation.onrender.com/api';
+const API_BASE = 'https://globalchat-presintation.render.com/api';
 
 function mapApiMessageToUi(msg) {
   return {
@@ -54,7 +54,7 @@ export function useChat(serverId, channelId) {
     // Try sending to API if token present
     (async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         if (!token) return;
 
         await fetch(`${API_BASE}/messages/send/`, {
@@ -75,7 +75,7 @@ export function useChat(serverId, channelId) {
     async (force = false) => {
       setIsLoading(true);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
 
       if (token) {
         try {
