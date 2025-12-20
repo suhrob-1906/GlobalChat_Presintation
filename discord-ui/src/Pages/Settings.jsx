@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import Servers from '../Components/Servers'
+import Test from '../Components/Test'
 
 export default function Settings() {
   return (
@@ -21,6 +22,8 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      <Test />
     </div>
   )
 }
