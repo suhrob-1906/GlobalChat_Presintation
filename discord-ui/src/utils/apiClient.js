@@ -6,31 +6,42 @@ export async function apiFetch(path, options = {}) {
     ...options.headers,
   };
 
-  if (!(options.body instanceof FormData) && options.body !== undefined) {
-    headers["Content-Type"] = "application/json";
+  if (!(options.body instanceof FormData)) {
+    if (options.body !== undefined) {
+      headers["Content-Type"] = "application/json";
+    }
   }
   
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(API_BASE + path, {
-    ...options,
-    headers,
-  });
+  try {
+    const res = await fetch(API_BASE + path, {
+      ...options,
+      headers,
+    });
 
-  const contentType = res.headers.get("content-type") || "";
-  const text = await res.text();
-  const data = contentType.includes("application/json") 
-    ? JSON.parse(text || "{}") 
-    : text;
+    const contentType = res.headers.get("content-type") || "";
+    const text = await res.text();
+    
+    let data;
+    if (contentType.includes("application/json")) {
+      data = text ? JSON.parse(text) : {};
+    } else {
+      data = text;
+    }
 
-  if (!res.ok) {
-    const err = new Error(data.detail || data.error || "API error");
-    err.status = res.status;
-    err.data = data;
-    throw err;
+    if (!res.ok) {
+      const err = new Error(data.detail || data.error || data.message || "API error");
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
   }
-  
-  return data;
 }
