@@ -6,3 +6,9 @@ django-cors-headers
 channels
 daphne
 gunicorn
+
+# Production helpers
+dj-database-url
+channels_redis
+psycopg2-binary
+whitenoise
