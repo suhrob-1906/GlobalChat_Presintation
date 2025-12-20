@@ -21,11 +21,12 @@ def env(key, default=None):
 # Default to DEBUG=True for local development unless explicitly disabled
 DEBUG = env("DEBUG", "True") == "True"
 
-SECRET_KEY = env("DJANGO_SECRET_KEY")
-if not SECRET_KEY and not DEBUG:
-    raise ImproperlyConfigured("DJANGO_SECRET_KEY environment variable is required in production")
-if not SECRET_KEY and DEBUG:
-    SECRET_KEY = "Suhrob"
+# Support both DJANGO_SECRET_KEY and SECRET_KEY (Render uses SECRET_KEY by default)
+SECRET_KEY = env("DJANGO_SECRET_KEY") or env("SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY or SECRET_KEY environment variable is required")
+    SECRET_KEY = "dev-unsafe-key-change-me"
 
 ALLOWED_HOSTS = env(
     "ALLOWED_HOSTS",
