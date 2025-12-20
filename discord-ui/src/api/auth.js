@@ -1,10 +1,9 @@
 import { apiFetch } from "../utils/apiClient";
 
 export function register(data) {
-  // Если это FormData - не устанавливаем Content-Type
-  // Если это объект - преобразуем в JSON
+  // Проверяем что это - FormData или объект
   const body = data instanceof FormData ? data : JSON.stringify(data);
-
+  
   return apiFetch("/auth/register/", {
     method: "POST",
     body: body,
@@ -25,7 +24,9 @@ export function getMe() {
 export function updateProfile(data) {
   const formData = new FormData();
   Object.keys(data).forEach(key => {
-    formData.append(key, data[key]);
+    if (data[key] !== null && data[key] !== undefined) {
+      formData.append(key, data[key]);
+    }
   });
 
   return apiFetch("/auth/profile/me/update/", {

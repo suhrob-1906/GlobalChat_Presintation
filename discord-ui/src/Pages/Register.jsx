@@ -24,24 +24,32 @@ export default function Register() {
     setLoading(true);
 
     try {
+      // Создаём данные для отправки
+      const dataToSend = {
+        username: form.username,
+        password: form.password,
+        nickname: form.nickname || "",
+        bio: form.bio || "",
+        phone: form.phone || "",
+      };
+
       // Если есть аватар - используем FormData
       if (avatar) {
         const formData = new FormData();
-        formData.append("username", form.username);
-        formData.append("nickname", form.nickname);
-        formData.append("password", form.password);
-        formData.append("phone", form.phone);
-        formData.append("bio", form.bio);
+        Object.entries(dataToSend).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
         formData.append("avatar", avatar);
-
+        
         await register(formData);
       } else {
-        // Если нет аватара - отправляем JSON
-        await register(form);
+        // Без аватара просто JSON
+        await register(dataToSend);
       }
 
       navigate("/");
     } catch (err) {
+      console.error("Registration error:", err);
       setError(err.message || "Ошибка при регистрации");
     } finally {
       setLoading(false);
