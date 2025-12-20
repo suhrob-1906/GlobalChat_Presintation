@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # Third-party
     "corsheaders",
     "rest_framework",
+    "rest_framework_simplejwt",  # ← ДОБАВЬ ЭТО
     "channels",
     "drf_spectacular",
 
@@ -78,7 +79,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://globalchat-presintation.onrender.com",  # Добавьте это
+    "https://globalchat-presintation.onrender.com",
 ]
 
 # ==================================================

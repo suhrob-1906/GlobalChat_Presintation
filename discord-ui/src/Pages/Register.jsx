@@ -24,15 +24,22 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("username", form.username);
-      formData.append("nickname", form.nickname);
-      formData.append("password", form.password);
-      formData.append("phone", form.phone);
-      formData.append("bio", form.bio);
-      if (avatar) formData.append("avatar", avatar);
+      // Если есть аватар - используем FormData
+      if (avatar) {
+        const formData = new FormData();
+        formData.append("username", form.username);
+        formData.append("nickname", form.nickname);
+        formData.append("password", form.password);
+        formData.append("phone", form.phone);
+        formData.append("bio", form.bio);
+        formData.append("avatar", avatar);
 
-      await register(formData);
+        await register(formData);
+      } else {
+        // Если нет аватара - отправляем JSON
+        await register(form);
+      }
+
       navigate("/");
     } catch (err) {
       setError(err.message || "Ошибка при регистрации");
